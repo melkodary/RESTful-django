@@ -23,3 +23,6 @@ REST urls:
 - localhost:8000/admin
 - localhost:8000/users/register/
 - localhost:8000/users/api-token-auth/
+
+
+NOTE: Check email_username branch which includes country code also as a field. 

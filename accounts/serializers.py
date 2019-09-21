@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate
 
 class AuthTokenSerializer(serializers.Serializer):
     phone = serializers.CharField(label=_("Phone"))
+    country_code = serializers.CharField(label=_("country_code"))
     password = serializers.CharField(
         label=_("Password"),
         style={'input_type': 'password'},
@@ -16,11 +17,18 @@ class AuthTokenSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         phone = attrs.get('phone')
+        country_code = attrs.get('country_code')
         password = attrs.get('password')
 
-        if phone and password:
+        if phone and country_code and password:
+            temp_user = User.objects.get(country_code=country_code, phone=phone)
+            if not temp_user:
+                msg = _('Unable to log in with provided credentials.')
+                raise serializers.ValidationError(msg, code='authorization')
+
+            username = temp_user.email
             user = authenticate(request=self.context.get('request'),
-                                username=phone, password=password)
+                                username=username, password=password)
             if not user:
                 msg = _('Unable to log in with provided credentials.')
                 raise serializers.ValidationError(msg, code='authorization')
@@ -42,6 +50,8 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name': {'required': True},
             'gender': {'required': True},
             'birth_date': {'required': True},
+            'phone': {'required': True},
+            'country_code': {'required': True},
             # 'avatar'        : {'required': True},
         }
 

@@ -21,8 +21,7 @@ COUNTRY_CODE_CHOICES = (
     (US_COUNTRY_CODE, 'US'),
 )
 
-MY_REGEX = r'^[1-9][0-9]{9,14}$'
-TWILO_REGEX = r'^\+[1-9]\d{10,14}$'
+# TWILO_REGEX = r'^\+[1-9]\d{10,14}$'
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -32,21 +31,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     birth_date = models.DateField(_('birth date'), null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M')
-    phone = models.CharField(max_length=16, unique=True, null=False,
-                             validators=[RegexValidator(regex=TWILO_REGEX,
-                                                        message="Must be in E.164 i.e +xxxxxxxxxxxxx")])
+    country_code = models.CharField(max_length=3, choices=COUNTRY_CODE_CHOICES, null=False,
+                                    validators=[RegexValidator(regex=r'^\+\d{1,2}$',
+                                                               message="Must be in E.164 i.e +xx")])
+    phone = models.CharField(max_length=13, null=False,
+                             validators=[RegexValidator(regex=r'^\d{10,14}$',
+                                                        message="Must be in E.164 i.e xxxxxxxxxxx")])
     is_staff = models.BooleanField(_('staff status'), default=False)
     objects = UserManger()
 
-    USERNAME_FIELD = 'phone'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['country_code', 'phone']
 
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+        unique_together = ('country_code', 'phone',)
 
-    # def get_phone(self):
-    #     return '%s%s' % (self.country_code, self.phone)
+    def get_phone(self):
+        return '%s%s' % (self.country_code, self.phone)
 
     def __str__(self):
         return self.get_full_name()

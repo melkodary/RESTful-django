@@ -13,8 +13,12 @@ from .models import User
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['email', 'is_staff']
+    list_display = ('email', 'country_code_phone', 'is_staff')
 
+    def country_code_phone(self, obj):
+        return '%s%s' % (obj.country_code, obj.phone)
+
+    country_code_phone.short_description = 'phone'
 
 admin.site.register(User, UserAdmin)
 # admin.site.register(User, CustomUserAdmin)
