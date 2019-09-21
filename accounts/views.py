@@ -15,14 +15,18 @@ class CustomAuthToken(ObtainAuthToken):
         # serializer = self.serializer_class(data=request.data,
         #                                    context={'request': request})
         serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'phone': user.phone
-        })
+        try:
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'phone': user.phone
+            })
+        except ValidationError:
+            return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserListView(generics.ListCreateAPIView):

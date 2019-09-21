@@ -22,7 +22,7 @@ COUNTRY_CODE_CHOICES = (
 )
 
 MY_REGEX = r'^[1-9][0-9]{9,14}$'
-TWILO_REGEX = r'^\+?[1-9]\d{10,14}$'
+TWILO_REGEX = r'^\+[1-9]\d{10,14}$'
 
 
 class User(AbstractBaseUser, PermissionsMixin):
